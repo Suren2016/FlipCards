@@ -24,18 +24,32 @@ const imageData = [
 ];
 
 const MemoryCards = () => {
-  // const [firstCard, setFirstCard] = useState(false);
-  // const [secondCard, setSecondCard] = useState(false);
+  // const [firstCard, setFirstCard] = useState(undefined);
+  // const [secondCard, setSecondCard] = useState(undefined);
+
+  const firstCard = useRef(undefined);
+  const secondCard = useRef(undefined);
+
   const [data, setData] = useState([]);
   const [flipRotation, setFlipRotation] = useState([
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   ]);
 
+  // let flipRotation = [
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  // ];
+
+  console.log('flipRotation - ', flipRotation);
+  console.log('length - ', flipRotation.length);
+  console.log('data - ', data);
+  // console.log('firstCard - ', firstCard);
+  // console.log('secondCard - ', secondCard);
+
   const shuffledData = () => {
     let a = [...imageData, ...imageData];
     const t = a.sort(() => Math.random() - 0.5);
     const result = t.map((item, index) => {
-      return {...item, key: index};
+      return {...item, key: index + 1};
     });
     return result;
   };
@@ -45,7 +59,7 @@ const MemoryCards = () => {
     // animationDataAndStyles();
   }, []);
 
-  console.log('data length - ', data.length);
+  // console.log('data length - ', data.length);
 
   // let flipRotation = [
   //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -55,7 +69,7 @@ const MemoryCards = () => {
     _ => useRef(new Animated.Value(0)).current,
   );
 
-  console.log('animationValue - ', animationValue);
+  // console.log('animationValue - ', animationValue);
 
   flipRotation.map((_, index) =>
     animationValue[index].addListener(
@@ -116,20 +130,88 @@ const MemoryCards = () => {
     ],
   }));
 
-  // FIXME:  set reset logic
   const reset = () => {
-    const temp = flipRotation.map(item => (item = 0));
-    setFlipRotation(temp);
+    const temp = data.map(item => (item = 0));
+    // flipRotation = temp;
+    setFlipRotation(...temp);
 
-    flipRotation.map((_, index) => {
-      animationValue[index].addListener(
-        ({value}) => (flipRotation[index] = value),
-      );
-      flipToBackStyle[index];
+    data.map((_, index) => {
+      flipCard(index);
     });
+
+    animationValue = data.map(
+      (_, index) => (animationValue[index].current = 0),
+    );
+
+    // reset data properties
+    const tempData = data.map((_, index) => {
+      return {...data[index], flag: false};
+    });
+    setData(tempData);
+    setFirstCard(undefined);
+    setSecondCard(undefined);
   };
 
-  console.log('fliprotetion - ', flipRotation);
+  console.log('firstCard - ', firstCard);
+  console.log('secondCard - ', secondCard);
+
+  // FIXME:  set - is the cards the same logic ?
+  const isCardtheSame = card => {
+    if (!firstCard.current) {
+      // setFirstCard(card);
+      firstCard.current = card;
+    } else if (!secondCard.current) {
+      // setSecondCard(card);
+      secondCard.current = card;
+
+      if (firstCard.current.item.id === card.item.id) {
+        console.log('YEES the same');
+        console.log('firstCard id - ', firstCard.current);
+        console.log('card id - ', card);
+
+        setTimeout(() => {
+          firstCard.current = undefined;
+          secondCard.current = undefined;
+          console.log('100 - done');
+        }, 100);
+      } else {
+        console.log('NOT same cards - ', firstCard, secondCard);
+        // flipRotation[firstCard.item.key] = 0;
+        let f = flipRotation;
+        f[firstCard.current.item.key - 1] = 0;
+        f[secondCard.current.item.key - 1] = 0;
+        console.log('f - ', f);
+        // setFlipRotation(f);
+
+        // flipRotation[card.item.key] = 0;
+        // const s = flipRotation;
+
+        // console.log('s - ', s);
+        setFlipRotation(f);
+
+        // console.log('rotation - ', flipRotation);
+
+        setTimeout(() => {
+          flipCard(firstCard.current.item.key - 1);
+          flipCard(secondCard.current.item.key - 1);
+        }, 1000);
+
+        setTimeout(() => {
+          flipToBack[firstCard.current.item.key - 1]();
+          flipToBack[secondCard.current.item.key - 1]();
+        }, 1100);
+
+        setTimeout(() => {
+          firstCard.current = undefined;
+          secondCard.current = undefined;
+        }, 1600);
+        // firstCard.current = undefined;
+        // secondCard.current = undefined;
+        // setFirstCard(undefined);
+        // setSecondCard(undefined);
+      }
+    }
+  };
 
   const ImageCard = ({item, index}) => {
     return (
@@ -138,10 +220,8 @@ const MemoryCards = () => {
           onPress={() => {
             item.flag = !item.flag;
             console.log('clicked item - ', item);
-            console.log('key = ', item.key);
-            console.log('index - ', index);
-            console.log('flipRotation[index] - ', flipRotation[index]);
 
+            isCardtheSame({item});
             flipCard(index);
             !!flipRotation[index] ? flipToBack[index]() : flipToFront[index]();
           }}>
@@ -154,14 +234,6 @@ const MemoryCards = () => {
             source={require('../assets/images/deck.png')}
           />
         </Pressable>
-        {/* <Animated.Image
-          style={[styles.cardFront, flipToBackStyle, styles.image]}
-          source={item.name}
-        /> */}
-        {/* <Animated.Image
-          style={[styles.cardBack, flipToFrontStyle, styles.image]}
-          source={require('../assets/images/deck.png')}
-        /> */}
       </>
     );
   };
@@ -177,10 +249,10 @@ const MemoryCards = () => {
 
       <View style={styles.imageContainer}>
         <>
-          {data?.map(item => {
+          {data?.map((item, index) => {
             return (
               <React.Fragment key={item.key}>
-                <ImageCard item={item} index={item.key} />
+                <ImageCard item={item} index={index} />
               </React.Fragment>
             );
           })}
