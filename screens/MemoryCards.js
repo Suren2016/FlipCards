@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {Fragment, useEffect, useRef, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,220 +10,252 @@ import {
   Pressable,
 } from 'react-native';
 
+const imageData = [
+  {id: 1, name: require('../assets/images/Animals/1.png'), flag: false},
+  {id: 2, name: require('../assets/images/Animals/2.png'), flag: false},
+  {id: 3, name: require('../assets/images/Animals/3.png'), flag: false},
+  {id: 4, name: require('../assets/images/Animals/4.png'), flag: false},
+  {id: 5, name: require('../assets/images/Animals/5.png'), flag: false},
+  {id: 6, name: require('../assets/images/Animals/6.png'), flag: false},
+  {id: 7, name: require('../assets/images/Animals/7.png'), flag: false},
+  {id: 8, name: require('../assets/images/Animals/8.png'), flag: false},
+  {id: 9, name: require('../assets/images/Animals/9.png'), flag: false},
+  {id: 10, name: require('../assets/images/Animals/10.png'), flag: false},
+];
+
 const MemoryCards = () => {
-  // const animatedValue = useRef(new Animated.Value(0)).current;
-  // const [firstCardFlip, setFirstCardFlip] = useState(false);
-  // // const [currentValue, setCurrentValue] = useState(0)
-  // let currentValue = 0;
+  // const [firstCard, setFirstCard] = useState(undefined);
+  // const [secondCard, setSecondCard] = useState(undefined);
 
-  // animatedValue.addListener(({value}) => {
-  //   // setCurrentValue(v)
-  //   console.log('v - ', value);
-  //   currentValue = value;
-  // });
+  const firstCard = useRef(undefined);
+  const secondCard = useRef(undefined);
 
-  // console.log('currentValue - ', currentValue);
-  // // useEffect(() => {
-  // //   animatedValue.addListener(({v}) => {
-  // //     value = v
-  // //   })
-  // // }, [value])
+  const [data, setData] = useState([]);
+  const [flipRotation, setFlipRotation] = useState([
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  ]);
 
-  // const frontInterpolate = animatedValue.interpolate({
-  //   inputRange: [0, 180],
-  //   outputRange: ['0deg', '180deg'],
-  // });
+  // let flipRotation = [
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  // ];
 
-  // const backInterpolate = animatedValue.interpolate({
-  //   inputRange: [0, 180],
-  //   outputRange: ['180deg', '360deg'],
-  // });
-
-    const flipAnimation = useRef( new Animated.Value( 0 ) ).current;
-
-  let flipRotation = 0;
-  flipAnimation.addListener( ( { value } ) => flipRotation = value );
-
-  const flipToFrontStyle = {
-    transform: [
-      { rotateY: flipAnimation.interpolate( {
-        inputRange: [ 0, 180 ],
-        outputRange: [ "0deg", "180deg" ]
-      } ) }
-    ]
-  };
-  const flipToBackStyle = {
-    transform: [
-      { rotateY: flipAnimation.interpolate( {
-        inputRange: [ 0, 180 ],
-        outputRange: [ "180deg", "0deg" ]
-      } ) }
-    ]
-  };
-
-  // const frontAnimatedStyle = {
-  //   transform: [{rotateY: frontInterpolate}],
-  // };
-
-  // const backAnimatedStyle = {
-  //   transform: [{rotateY: backInterpolate}],
-  // };
-
-  const flipToFront = () => {
-    Animated.timing( flipAnimation, {
-      toValue: 180,
-      duration: 200,
-      useNativeDriver: true,
-    } ).start();
-  };
-
-  const flipToBack = () => {
-    Animated.timing( flipAnimation, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: true,
-    } ).start();
-  };
-
-  const flipCard = () => {
-    console.log('flipRotation - ', flipRotation);
-    if(flipRotation > 0) {
-      flipToFront()
-    } else if(flipRotation < 180) {
-      flipToBack()
-    }
-  }
-
-  // const flipCard = () => {
-  //   if (currentValue >= 90) {
-  //     Animated.timing(animatedValue, {
-  //       toValue: 0,
-  //       duration: 500,
-  //       useNativeDriver: false,
-  //     }).start();
-  //   } else {
-  //     Animated.timing(animatedValue, {
-  //       toValue: 180,
-  //       duration: 500,
-  //       useNativeDriver: false,
-  //     }).start();
-  //   }
-
-  //   setFirstCardFlip(!firstCardFlip);
-  // };
-
-  const data = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-  ];
-  const imageData = [
-    {id: 1, name: require('../assets/images/Animals/1.png'), flag: false},
-    {id: 2, name: require('../assets/images/Animals/2.png'), flag: false},
-    {id: 3, name: require('../assets/images/Animals/3.png'), flag: false},
-    {id: 4, name: require('../assets/images/Animals/4.png'), flag: false},
-    {id: 5, name: require('../assets/images/Animals/5.png'), flag: false},
-    {id: 6, name: require('../assets/images/Animals/6.png'), flag: false},
-    {id: 7, name: require('../assets/images/Animals/7.png'), flag: false},
-    {id: 8, name: require('../assets/images/Animals/8.png'), flag: false},
-    {id: 9, name: require('../assets/images/Animals/9.png'), flag: false},
-    {id: 10, name: require('../assets/images/Animals/10.png'), flag: false},
-  ];
+  console.log('flipRotation - ', flipRotation);
+  console.log('length - ', flipRotation.length);
+  console.log('data - ', data);
+  // console.log('firstCard - ', firstCard);
+  // console.log('secondCard - ', secondCard);
 
   const shuffledData = () => {
     let a = [...imageData, ...imageData];
     const t = a.sort(() => Math.random() - 0.5);
-    return t;
-  };
-
-  console.log('shuffledData - ', shuffledData());
-  // console.log('frontAnimatedStyle - ', frontAnimatedStyle);
-
-  const selectImage = id => {
-    shuffledData.map(item => {
-      if (item.id === id) {
-        item = undefined;
-      }
-      return item;
+    const result = t.map((item, index) => {
+      return {...item, key: index + 1};
     });
+    return result;
   };
 
-  // const ImageCard = ({name, id, onPress}) => {
-  //   return (
-  //     // <Animated.View style={[styles.imageCard, firstCardFlip ? frontInterpolate : backInterpolate]}>
-  //     <TouchableWithoutFeedback
-  //       // style={styles.imageCard}
-  //       onPress={() => {
-  //         console.log('id - ', id);
-  //         // flag = true
-  //         onPress();
-  //       }}>
-  //       {/* <Animated.Image style={[styles.image, frontAnimatedStyle]}  source={firstCardFlip ? name : require('../assets/images/deck.png')} resizeMode="contain"  /> */}
-  //       <Animated.Image
-  //         style={[styles.image, frontAnimatedStyle]}
-  //         source={name}
-  //         resizeMode="contain"
-  //       />
-  //       <Animated.Image
-  //         style={[styles.image, backAnimatedStyle]}
-  //         source={name}
-  //         resizeMode="contain"
-  //       />
-  //       {/* <Image style={styles.image}  source={name} resizeMode="contain" /> */}
-  //     </TouchableWithoutFeedback>
-  //     // </Animated.View>
-  //   );
-  // };
+  useEffect(() => {
+    setData(shuffledData());
+    // animationDataAndStyles();
+  }, []);
+
+  // console.log('data length - ', data.length);
+
+  // let flipRotation = [
+  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  // ];
+
+  const animationValue = flipRotation.map(
+    _ => useRef(new Animated.Value(0)).current,
+  );
+
+  // console.log('animationValue - ', animationValue);
+
+  flipRotation.map((_, index) =>
+    animationValue[index].addListener(
+      ({value}) => (flipRotation[index] = value),
+    ),
+  );
+
+  const flipToBack = flipRotation.map((_, index) => () => {
+    Animated.timing(animationValue[index], {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  });
+
+  // -----------------------------------------------
+
+  const flipToFront = flipRotation.map((_, index) => () => {
+    Animated.timing(animationValue[index], {
+      toValue: 180,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  });
+
+  // -----------------------------------------------
+  const flipCard = index => {
+    if (flipRotation[index] > 0) {
+      flipToFront[index]();
+    } else if (flipRotation[index] < 180) {
+      flipToBack[index]();
+    }
+  };
+
+  // -----------------------------------------------
+
+  const flipToFrontStyle = flipRotation.map((_, index) => ({
+    transform: [
+      {
+        rotateY: animationValue[index].interpolate({
+          inputRange: [0, 180],
+          outputRange: ['0deg', '180deg'],
+        }),
+      },
+    ],
+  }));
+
+  // -----------------------------------------------
+
+  const flipToBackStyle = flipRotation.map((_, index) => ({
+    transform: [
+      {
+        rotateY: animationValue[index].interpolate({
+          inputRange: [0, 180],
+          outputRange: ['180deg', '0deg'],
+        }),
+      },
+    ],
+  }));
+
+  const reset = () => {
+    const temp = data.map(item => (item = 0));
+    // flipRotation = temp;
+    setFlipRotation(...temp);
+
+    data.map((_, index) => {
+      flipCard(index);
+    });
+
+    animationValue = data.map(
+      (_, index) => (animationValue[index].current = 0),
+    );
+
+    // reset data properties
+    const tempData = data.map((_, index) => {
+      return {...data[index], flag: false};
+    });
+    setData(tempData);
+    setFirstCard(undefined);
+    setSecondCard(undefined);
+  };
+
+  console.log('firstCard - ', firstCard);
+  console.log('secondCard - ', secondCard);
+
+  // FIXME:  set - is the cards the same logic ?
+  const isCardtheSame = card => {
+    if (!firstCard.current) {
+      // setFirstCard(card);
+      firstCard.current = card;
+    } else if (!secondCard.current) {
+      // setSecondCard(card);
+      secondCard.current = card;
+
+      if (firstCard.current.item.id === card.item.id) {
+        console.log('YEES the same');
+        console.log('firstCard id - ', firstCard.current);
+        console.log('card id - ', card);
+
+        setTimeout(() => {
+          firstCard.current = undefined;
+          secondCard.current = undefined;
+          console.log('100 - done');
+        }, 100);
+      } else {
+        console.log('NOT same cards - ', firstCard, secondCard);
+        // flipRotation[firstCard.item.key] = 0;
+        let f = flipRotation;
+        f[firstCard.current.item.key - 1] = 0;
+        f[secondCard.current.item.key - 1] = 0;
+        console.log('f - ', f);
+        // setFlipRotation(f);
+
+        // flipRotation[card.item.key] = 0;
+        // const s = flipRotation;
+
+        // console.log('s - ', s);
+        setFlipRotation(f);
+
+        // console.log('rotation - ', flipRotation);
+
+        setTimeout(() => {
+          flipCard(firstCard.current.item.key - 1);
+          flipCard(secondCard.current.item.key - 1);
+        }, 1000);
+
+        setTimeout(() => {
+          flipToBack[firstCard.current.item.key - 1]();
+          flipToBack[secondCard.current.item.key - 1]();
+        }, 1100);
+
+        setTimeout(() => {
+          firstCard.current = undefined;
+          secondCard.current = undefined;
+        }, 1600);
+        // firstCard.current = undefined;
+        // secondCard.current = undefined;
+        // setFirstCard(undefined);
+        // setSecondCard(undefined);
+      }
+    }
+  };
+
+  const ImageCard = ({item, index}) => {
+    return (
+      <>
+        <Pressable
+          onPress={() => {
+            item.flag = !item.flag;
+            console.log('clicked item - ', item);
+
+            isCardtheSame({item});
+            flipCard(index);
+            !!flipRotation[index] ? flipToBack[index]() : flipToFront[index]();
+          }}>
+          <Animated.Image
+            style={[styles.cardFront, flipToBackStyle[index], styles.image]}
+            source={item.name}
+          />
+          <Animated.Image
+            style={[styles.cardBack, flipToFrontStyle[index], styles.image]}
+            source={require('../assets/images/deck.png')}
+          />
+        </Pressable>
+      </>
+    );
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.rowSpace}>
         <Text style={styles.time}>Time: 00:00</Text>
-        <TouchableOpacity onPress={() => {}} style={styles.reset}>
+        <TouchableOpacity onPress={reset} style={styles.reset}>
           <Text style={styles.resetText}>Reset</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.imageContainer}>
-        {/* {shuffledData().map(item => {
-          console.log('item - ', item);
-          return (
-            <Animated.View style={firstCardFlip ? frontInterpolate : backInterpolate}>
-              <ImageCard
-                name={
-                  item.flag ? item.name : require('../assets/images/deck.png')
-                }
-                id={item.id}
-                onPress={() => flipCard()}
-              />
-            </Animated.View>
-          );
-        })} */}
-        {/* <Animated.View style={firstCardFlip ? frontInterpolate : backInterpolate}> */}
-        {/* <Animated.View style={backInterpolate}> */}
-        {/* <ImageCard
-                name={
-                  require('../assets/images/Animals/1.png')
-                }
-                id={1}
-                onPress={() => flipCard()}
-              /> */}
-        {/* </Animated.View> */}
-
         <>
-          <Pressable
-            style={ styles.imageCard }
-            onPress={() => {
-              flipCard();
-              !!flipRotation ? flipToBack() : flipToFront()
-            }}>
-            <Animated.Image
-              style={{...styles.cardFront, ...flipToBackStyle, ...styles.image}}
-              source={require('../assets/images/Animals/1.png')}
-            />
-            <Animated.Image
-              style={{...styles.cardBack, ...flipToFrontStyle, ...styles.image}}
-              source={require('../assets/images/deck.png')}
-            />
-          </Pressable>
+          {data?.map((item, index) => {
+            return (
+              <React.Fragment key={item.key}>
+                <ImageCard item={item} index={index} />
+              </React.Fragment>
+            );
+          })}
         </>
       </View>
     </View>
@@ -263,9 +295,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  imageCard: {
-    // margin: 8
-  },
+
   image: {
     height: 90,
     width: 66,
