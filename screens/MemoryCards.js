@@ -1,26 +1,24 @@
-import React, {Fragment, useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
-  TouchableWithoutFeedback,
-  Image,
   Animated,
   Pressable,
 } from 'react-native';
 
 const imageData = [
-  {id: 1, name: require('../assets/images/Animals/1.png'), flag: false},
-  {id: 2, name: require('../assets/images/Animals/2.png'), flag: false},
-  {id: 3, name: require('../assets/images/Animals/3.png'), flag: false},
-  {id: 4, name: require('../assets/images/Animals/4.png'), flag: false},
-  {id: 5, name: require('../assets/images/Animals/5.png'), flag: false},
-  {id: 6, name: require('../assets/images/Animals/6.png'), flag: false},
-  {id: 7, name: require('../assets/images/Animals/7.png'), flag: false},
-  {id: 8, name: require('../assets/images/Animals/8.png'), flag: false},
-  {id: 9, name: require('../assets/images/Animals/9.png'), flag: false},
-  {id: 10, name: require('../assets/images/Animals/10.png'), flag: false},
+  { id: 1, name: require('../assets/images/Animals/1.png'), flag: false },
+  { id: 2, name: require('../assets/images/Animals/2.png'), flag: false },
+  { id: 3, name: require('../assets/images/Animals/3.png'), flag: false },
+  { id: 4, name: require('../assets/images/Animals/4.png'), flag: false },
+  { id: 5, name: require('../assets/images/Animals/5.png'), flag: false },
+  { id: 6, name: require('../assets/images/Animals/6.png'), flag: false },
+  { id: 7, name: require('../assets/images/Animals/7.png'), flag: false },
+  { id: 8, name: require('../assets/images/Animals/8.png'), flag: false },
+  { id: 9, name: require('../assets/images/Animals/9.png'), flag: false },
+  { id: 10, name: require('../assets/images/Animals/10.png'), flag: false },
 ];
 
 const MemoryCards = () => {
@@ -29,27 +27,22 @@ const MemoryCards = () => {
 
   const firstCard = useRef(undefined);
   const secondCard = useRef(undefined);
+  // const disabled = useRef(false);
 
   const [data, setData] = useState([]);
   const [flipRotation, setFlipRotation] = useState([
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   ]);
 
-  // let flipRotation = [
-  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  // ];
-
-  console.log('flipRotation - ', flipRotation);
-  console.log('length - ', flipRotation.length);
-  console.log('data - ', data);
-  // console.log('firstCard - ', firstCard);
-  // console.log('secondCard - ', secondCard);
+  const [hideCards, setHideCards] = useState([
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  ]);
 
   const shuffledData = () => {
     let a = [...imageData, ...imageData];
     const t = a.sort(() => Math.random() - 0.5);
     const result = t.map((item, index) => {
-      return {...item, key: index + 1};
+      return { ...item, key: index + 1 };
     });
     return result;
   };
@@ -59,23 +52,38 @@ const MemoryCards = () => {
     // animationDataAndStyles();
   }, []);
 
-  // console.log('data length - ', data.length);
+  useEffect(() => {
+    if (firstCard && secondCard) {
+      console.log('57 - point');
+      flipRotation.map((_, i) => {
+        hidenCardStyle[i];
+      });
+    }
+  }, [hidenCardStyle, flipRotation]);
 
-  // let flipRotation = [
-  //   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  // ];
-
-  const animationValue = flipRotation.map(
+  let animationValue = flipRotation.map(
     _ => useRef(new Animated.Value(0)).current,
   );
 
-  // console.log('animationValue - ', animationValue);
-
   flipRotation.map((_, index) =>
     animationValue[index].addListener(
-      ({value}) => (flipRotation[index] = value),
+      ({ value }) => (flipRotation[index] = value),
     ),
   );
+
+  let opacityAnimationValue = flipRotation.map(
+    _ => useRef(new Animated.Value(1)).current,
+  );
+
+  flipRotation.map((_, index) =>
+    opacityAnimationValue[index].addListener(
+      ({ value }) => (opacityAnimationValue[index] = value),
+    ),
+  );
+
+  console.log('flipRotation - ', flipRotation);
+  console.log('data - ', data);
+  console.log('opacityAnimationValue - ', opacityAnimationValue);
 
   const flipToBack = flipRotation.map((_, index) => () => {
     Animated.timing(animationValue[index], {
@@ -96,6 +104,17 @@ const MemoryCards = () => {
   });
 
   // -----------------------------------------------
+
+  const hideCard = flipRotation.map((_, index) => () => {
+    Animated.timing(opacityAnimationValue[index], {
+      toValue: 0,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  });
+
+  // ------------------------------------------------
+
   const flipCard = index => {
     if (flipRotation[index] > 0) {
       flipToFront[index]();
@@ -103,6 +122,34 @@ const MemoryCards = () => {
       flipToBack[index]();
     }
   };
+
+  // -----------------------------------------------
+
+  const hideTwoCards = useCallback(
+    (firstCard, secondCard) => {
+      if (
+        firstCard &&
+        secondCard &&
+        firstCard.current.item.id === secondCard.current.item.id
+      ) {
+        console.log('TWO CARDS ARE HIDDEN');
+        console.log('first key - ', firstCard.current.item.key - 1);
+        console.log('second key - ', secondCard.current.item.key - 1);
+
+        hideCard[firstCard.current.item.key - 1]();
+        hideCard[secondCard.current.item.key - 1]();
+
+        console.log('opacityAnimationValue - ', opacityAnimationValue);
+
+        console.log('All hidenCardStyle - ', hidenCardStyle);
+        console.log(
+          'hidenCardStyle[index] - ',
+          hidenCardStyle[0].opacity._parent._value,
+        );
+      }
+    },
+    [hidenCardStyle, opacityAnimationValue, hideCard],
+  );
 
   // -----------------------------------------------
 
@@ -130,44 +177,62 @@ const MemoryCards = () => {
     ],
   }));
 
+  // ------------------------------------------------
+
+  const hidenCardStyle = flipRotation.map((_, index) => ({
+    opacity: opacityAnimationValue[index].interpolate({
+      inputRange: [0, 100],
+      outputRange: [1, 0],
+    }),
+  }));
+
+  // ------------------------------------------------
+
   const reset = () => {
-    const temp = data.map(item => (item = 0));
-    // flipRotation = temp;
-    setFlipRotation(...temp);
+    const temp = data.map((_, index) => (flipRotation[index] = 0));
+    setFlipRotation([...temp]);
 
     data.map((_, index) => {
       flipCard(index);
     });
 
-    animationValue = data.map(
-      (_, index) => (animationValue[index].current = 0),
-    );
-
-    // reset data properties
-    const tempData = data.map((_, index) => {
-      return {...data[index], flag: false};
+    animationValue = data.map((_, index) => {
+      animationValue[index].current = 0;
     });
-    setData(tempData);
-    setFirstCard(undefined);
-    setSecondCard(undefined);
-  };
 
-  console.log('firstCard - ', firstCard);
-  console.log('secondCard - ', secondCard);
+    opacityAnimationValue = data.map((_, index) => {
+      opacityAnimationValue[index]._value = 1;
+    });
+
+    flipRotation.map((_, i) => {
+      console.log('hideCard - ', hideCard[i]);
+    });
+
+    setData(shuffledData());
+    firstCard.current = undefined;
+    secondCard.current = undefined;
+  };
 
   // FIXME:  set - is the cards the same logic ?
   const isCardtheSame = card => {
     if (!firstCard.current) {
-      // setFirstCard(card);
       firstCard.current = card;
+      console.log('firstCard - ', firstCard);
+      console.log('animationValue - ', animationValue);
     } else if (!secondCard.current) {
-      // setSecondCard(card);
       secondCard.current = card;
 
       if (firstCard.current.item.id === card.item.id) {
         console.log('YEES the same');
         console.log('firstCard id - ', firstCard.current);
-        console.log('card id - ', card);
+        console.log('secondCard id - ', secondCard.current);
+
+        // TODO: hide the acrds here
+        hideTwoCards(firstCard, secondCard);
+        console.log(
+          `hidenCardStyle[${firstCard.current.item.key - 1}] - `,
+          hidenCardStyle[firstCard.current.item.key - 1].opacity._parent._value,
+        );
 
         setTimeout(() => {
           firstCard.current = undefined;
@@ -176,20 +241,11 @@ const MemoryCards = () => {
         }, 100);
       } else {
         console.log('NOT same cards - ', firstCard, secondCard);
-        // flipRotation[firstCard.item.key] = 0;
+
         let f = flipRotation;
         f[firstCard.current.item.key - 1] = 0;
         f[secondCard.current.item.key - 1] = 0;
-        console.log('f - ', f);
-        // setFlipRotation(f);
-
-        // flipRotation[card.item.key] = 0;
-        // const s = flipRotation;
-
-        // console.log('s - ', s);
         setFlipRotation(f);
-
-        // console.log('rotation - ', flipRotation);
 
         setTimeout(() => {
           flipCard(firstCard.current.item.key - 1);
@@ -204,6 +260,7 @@ const MemoryCards = () => {
         setTimeout(() => {
           firstCard.current = undefined;
           secondCard.current = undefined;
+          // disabled.current = false;
         }, 1600);
         // firstCard.current = undefined;
         // secondCard.current = undefined;
@@ -213,15 +270,21 @@ const MemoryCards = () => {
     }
   };
 
-  const ImageCard = ({item, index}) => {
+  const ImageCard = ({ item, index }) => {
+    // console.log('flipToFront[index]() - ', flipToFront[index]());
+
     return (
-      <>
+      <Animated.View
+        style={{
+          opacity: hidenCardStyle[index].opacity._parent._value,
+        }}
+        pointerEvents={
+          hidenCardStyle[index].opacity._parent._value ? 'auto' : 'none'
+        }>
         <Pressable
           onPress={() => {
             item.flag = !item.flag;
-            console.log('clicked item - ', item);
-
-            isCardtheSame({item});
+            isCardtheSame({ item });
             flipCard(index);
             !!flipRotation[index] ? flipToBack[index]() : flipToFront[index]();
           }}>
@@ -234,7 +297,7 @@ const MemoryCards = () => {
             source={require('../assets/images/deck.png')}
           />
         </Pressable>
-      </>
+      </Animated.View>
     );
   };
 
@@ -258,6 +321,9 @@ const MemoryCards = () => {
           })}
         </>
       </View>
+      <View style={[styles.box, { opacity: 0 }]}>
+        <Text>ARSEN</Text>
+      </View>
     </View>
   );
 };
@@ -271,12 +337,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(42, 101, 59, 1.0)',
   },
   rowSpace: {
+    marginTop: 24,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   reset: {
-    borderWidth: 1,
-    borderColor: '#fff',
+    // borderWidth: 1,
+    // borderColor: '#fff',
     borderRadius: 4,
   },
   resetText: {
@@ -290,7 +357,7 @@ const styles = StyleSheet.create({
     // height: '60%',
     flex: 2,
     marginTop: 24,
-    borderWidth: 1,
+    // borderWidth: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
@@ -318,6 +385,10 @@ const styles = StyleSheet.create({
   //   alignSelf: 'flex-start',
   //   marginTop: 16
   // }
+  box: {
+    marginTop: 24,
+    borderWidth: 1,
+  },
 });
 
 export default MemoryCards;
